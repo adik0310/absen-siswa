@@ -188,11 +188,21 @@
             </div>
 
             <div>
-                <h1 class="page-header-title">Selamat Datang, {{ $user->nama ?? 'Guru' }}!</h1>
-                <p class="page-header-sub">
-                    <i class="bi bi-clock-history me-1"></i> {{ now()->translatedFormat('l, d F Y') }}
-                </p>
-            </div>
+            <h1 class="page-header-title">Selamat Datang, {{ $user->nama ?? 'Guru' }}!</h1>
+            
+            {{-- TAMBAHKAN KETERANGAN WALI KELAS DI SINI --}}
+            @if($kelasWali)
+                <div class="mt-1">
+                    <span class="badge bg-success" style="font-weight: 500; border-radius: 6px;">
+                        <i class="bi bi-star-fill me-1"></i> Wali Kelas: {{ $kelasWali->nama_kelas }}
+                    </span>
+                </div>
+            @endif
+
+            <p class="page-header-sub mt-2">
+                <i class="bi bi-clock-history me-1"></i> {{ now()->translatedFormat('l, d F Y') }}
+            </p>
+        </div>
         </div>
 
         <div class="page-header-right">
@@ -257,6 +267,10 @@
                             <a href="{{ route('guru.absensi.index', ['id_jadwal_mengajar' => $j->id_jadwal_mengajar]) }}" 
                             class="btn btn-sm btn-outline-success rounded-pill px-3">
                                 <i class="bi bi-pencil-square me-1"></i> Absensi
+                            </a>
+                            <a href="{{ route('guru.absensi.scan', ['id_jadwal_mengajar' => $j->id_jadwal_mengajar]) }}" 
+                            class="btn btn-sm btn-outline-success rounded-pill px-3">
+                            <i class="bi bi-qr-code-scan me-1"></i> Scan Kartu
                             </a>
                             </td>
                         </tr>

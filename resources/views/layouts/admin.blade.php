@@ -301,6 +301,7 @@ main.container-main{
                             </a>
                             <ul class="dropdown-menu">
                                 <li><a class="dropdown-item" href="{{ route('admin.jadwal.index') }}"><i class="bi bi-calendar2-week"></i> Jadwal</a></li>
+                                <li><a class="dropdown-item" href="{{ route('admin.qrcode.siswa') }}"><i class="bi bi-qr-code-scan"></i> QR Code Presensi</a></li>
                                 <li><a class="dropdown-item" href="{{ route('admin.mapel.index') }}"><i class="bi bi-book"></i> Mata Pelajaran</a></li>
                                 <li><a class="dropdown-item" href="{{ route('admin.siswa.index') }}"><i class="bi bi-people"></i> Siswa</a></li>
                                 <li><a class="dropdown-item" href="{{ route('admin.guru.index') }}"><i class="bi bi-person-badge"></i> Guru</a></li>

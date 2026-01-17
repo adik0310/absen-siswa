@@ -16,6 +16,8 @@ class Absensi extends Model
         'id_jadwal_mengajar',
         'id_siswa',
         'tanggal',
+        'jam_masuk',
+        'jam_keluar',   
         'keterangan',
     ];
 

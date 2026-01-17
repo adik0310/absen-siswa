@@ -25,6 +25,12 @@ class DashboardController extends Controller
             $guruRecord = Guru::where('id_users', $user->id_users)->first();
         }
 
+        $kelasWali = null;
+        if ($guruRecord) {
+            // Cari di tabel kelas yang kolom id_guru-nya adalah ID guru ini
+            $kelasWali = \App\Models\Kelas::where('id_guru', $guruRecord->id_guru)->first();
+        }
+
         // Siapkan query jadwal
         $jadwalQuery = JadwalMengajar::query();
         
@@ -93,6 +99,7 @@ class DashboardController extends Controller
             'absensiToday' => $absensiToday,
             'jadwalsToday' => $jadwalsToday,
             'todayName' => $todayName,
+            'kelasWali' => $kelasWali,
         ]);
     }
 }

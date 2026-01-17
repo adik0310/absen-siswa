@@ -13,15 +13,19 @@ class CreateAbsensiTable extends Migration
             $table->unsignedInteger('id_jadwal_mengajar')->nullable();
             $table->unsignedInteger('id_siswa')->nullable();
             $table->date('tanggal')->nullable();
+            
+            // --- Kolom Tambahan untuk Fitur 2x Scan ---
+            $table->time('jam_masuk')->nullable(); // Mencatat jam scan pertama
+            $table->time('jam_keluar')->nullable(); // Mencatat jam scan kedua
+            // ------------------------------------------
+
             $table->enum('keterangan', ['hadir','sakit','izin','alfa'])->nullable();
 
             $table->index('id_jadwal_mengajar');
             $table->index('id_siswa');
 
             $table->foreign('id_jadwal_mengajar')->references('id_jadwal_mengajar')->on('jadwal_mengajar')->onDelete('cascade');
-
-            $table->foreign('id_siswa')->references('id_siswa')->on('siswa')
-                ->onDelete('cascade');
+            $table->foreign('id_siswa')->references('id_siswa')->on('siswa')->onDelete('cascade');
 
             $table->timestamps();
             $table->softDeletes();

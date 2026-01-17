@@ -4,35 +4,40 @@
     <meta charset="utf-8">
     <title>REKAP ABSEN SISWA</title>
     <style>
-        @page { margin: 1cm; }
+        @page { margin: 0.8cm; }
+        
         body { 
-            font-family: 'Arial', sans-serif; 
-            font-size: 11px; 
-            line-height: 1.4;
+            font-family: 'DejaVu Sans', sans-serif; 
+            font-size: 9px; 
+            line-height: 1.2; 
+            color: #333;
         }
         
-        /* Gaya Kop Surat */
         .kop-table { width: 100%; border-collapse: collapse; }
-        .logo { width: 80px; text-align: center; }
+        .logo { width: 60px; text-align: center; }
         .kop-text { text-align: center; }
-        .instansi { font-size: 18px; font-weight: bold; margin: 0; }
-        .alamat { font-size: 10px; margin-top: 5px; }
+        .instansi { font-size: 14px; font-weight: bold; margin: 0; }
+        .alamat { font-size: 8px; margin-top: 2px; }
 
-        .divider { border-bottom: 2px solid #000; margin: 10px 0; }
-        .title-doc { text-align: center; font-weight: bold; font-size: 14px; text-decoration: underline; margin-bottom: 15px; }
+        .divider { border-bottom: 1.5px solid #000; margin: 8px 0; }
 
         /* Gaya Form Atas */
-        .info-table { width: 100%; margin-bottom: 10px; }
-        .info-table td { padding: 2px 0; }
+        .info-table { width: 100%; margin-bottom: 5px; }
+        .info-table td { padding: 1px 0; vertical-align: top; }
+        /* Kelas & Mapel rata kiri, Tgl & Tahun rata kanan */
+        .text-right { text-align: right; }
 
-        /* Gaya Tabel Absen */
-        table.data-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        table.data-table { width: 100%; border-collapse: collapse; margin-top: 5px; }
         table.data-table th, table.data-table td { 
             border: 1px solid #000; 
-            padding: 5px; 
+            padding: 3px 2px; 
             text-align: center; 
         }
-        .col-nama { text-align: left !important; width: 200px; }
+        .col-nama { text-align: left !important; width: 220px; text-transform: uppercase; }
+        .bg-light { background-color: #f5f5f5; }
+        
+        table { page-break-inside: auto; }
+        tr { page-break-inside: avoid; page-break-after: auto; }
     </style>
 </head>
 <body>
@@ -40,19 +45,17 @@
 <table class="kop-table">
     <tr>
         <td class="logo">
-            <img src="{{ public_path('image/logo_ma.png') }}" width="70">
+            <img src="{{ public_path('image/logo_ma.png') }}" width="50">
         </td>
         <td class="kop-text">
             <div class="instansi">REKAP ABSENSI SISWA</div>
             <div class="instansi">MADRASAH ALIYAH NURUL IMAN</div>
             <div class="alamat">
-                <i>
-                Jalan Cibaduyut Raya Blok TVRI III RT.03 RW.03, Kelurahan Cibaduyut Kidul,<br>
-                Kecamatan Bojong Loa Kidul, Kota Bandung, Jawa Barat
-                </i>
+                <i>Jalan Cibaduyut Raya Blok TVRI III RT.03 RW.03, Kelurahan Cibaduyut Kidul,<br>
+                Kecamatan Bojong Loa Kidul, Kota Bandung, Jawa Barat</i>
             </div>
         </td>
-        <td width="80"></td>
+        <td width="60"></td>
     </tr>
 </table>
 
@@ -60,32 +63,30 @@
 
 <table class="info-table">
     <tr>
-        <td width="15%">Kelas</td>
-        <td width="35%">: {{ $jadwal->kelas->nama_kelas }}</td>
-        <td width="25%">Hari, Tanggal/Bulan/Tahun</td>
-        <td width="25%">: {{ $tanggalCetak }}</td>
+        <td width="12%">Kelas</td>
+        <td width="38%">: {{ $jadwal->kelas->nama_kelas }}</td>
+        <td width="50%" class="text-right">Tgl Cetak: {{ $tanggalCetak }}</td>
     </tr>
     <tr>
-        <td>Mata Pelajaran</td>
+        <td>Mapel</td>
         <td>: {{ $jadwal->mataPelajaran->nama_mapel }}</td>
-        <td>Tahun Ajaran</td>
-        <td>: 2023/2024</td> </tr>
+        <td class="text-right">Thn Ajaran: 2023/2024</td> 
+    </tr>
 </table>
 
 <table class="data-table">
     <thead>
-        <tr>
-            <th rowspan="2" width="30">No</th>
-            <th rowspan="2" width="80">NIS</th>
+        <tr class="bg-light">
+            <th rowspan="2" width="20">No</th>
+            <th rowspan="2" width="60">NIS</th>
             <th rowspan="2">Nama Siswa</th>
-            <th colspan="4">Kehadiran Siswa</th>
-            <th rowspan="2" width="50">Total</th>
+            <th colspan="4">Absensi</th>
         </tr>
-        <tr>
-            <th width="25">H</th>
-            <th width="25">S</th>
-            <th width="25">I</th>
-            <th width="25">A</th>
+        <tr class="bg-light">
+            <th width="20">H</th>
+            <th width="20">S</th>
+            <th width="20">I</th>
+            <th width="20">A</th>
         </tr>
     </thead>
     <tbody>
@@ -94,11 +95,10 @@
             <td>{{ $i + 1 }}</td>
             <td>{{ $r->nis ?? '-' }}</td>
             <td class="col-nama">{{ $r->nama_siswa }}</td>
-            <td>{{ $r->hadir > 0 ? '✓' : '' }}</td>
-            <td>{{ $r->sakit > 0 ? '✓' : '' }}</td>
-            <td>{{ $r->izin > 0 ? '✓' : '' }}</td>
-            <td>{{ $r->alfa > 0 ? '✓' : '' }}</td>
-            <td>{{ $r->hadir + $r->sakit + $r->izin + $r->alfa }}</td>
+            <td>{{ $r->hadir > 0 ? 'H' : '' }}</td>
+            <td>{{ $r->sakit > 0 ? 'S' : '' }}</td>
+            <td>{{ $r->izin > 0 ? 'I' : '' }}</td>
+            <td>{{ $r->alfa > 0 ? 'A' : '' }}</td>
         </tr>
     @endforeach
     </tbody>

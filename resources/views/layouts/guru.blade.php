@@ -32,7 +32,7 @@ body{
 }
 
 /* =========================================================
-   NAVBAR FULL GREEN
+    NAVBAR FULL GREEN
 ========================================================= */
 .navbar-wrapper{
     background: var(--main-green) !important;
@@ -157,6 +157,7 @@ body{
     transition:.15s;
     position:relative;
     white-space:nowrap;
+    text-decoration: none;
 }
 .menu-left .nav-link:hover{
     background:rgba(255,255,255,.18);
@@ -199,10 +200,19 @@ body{
 <body>
 @php
     use App\Models\Kelas;
+    use App\Models\Guru; // Import model Guru
     use Illuminate\Support\Facades\Storage;
 
-    $kelasList = Kelas::orderBy('nama_kelas')->get();
     $user = auth()->user();
+    
+    // Logika mencari wali kelas
+    $guruRecord = Guru::where('id_users', $user->id_users)->first();
+    $kelasWali = null;
+    if ($guruRecord) {
+        $kelasWali = Kelas::where('id_guru', $guruRecord->id_guru)->first();
+    }
+
+    $kelasList = Kelas::orderBy('nama_kelas')->get();
     $firstKelasId = $kelasList->first()->id_kelas ?? null;
 
     $foto = ($user->foto && Storage::disk('public')->exists($user->foto))
@@ -260,7 +270,7 @@ body{
                         <li>
                             <form method="POST" action="{{ route('logout') }}">
                                 @csrf
-                                <button class="dropdown-item text-danger">
+                                <button class="dropdown-item text-danger border-0 bg-transparent w-100 text-start">
                                     <i class="bi bi-box-arrow-right"></i> Logout
                                 </button>
                             </form>
@@ -280,13 +290,24 @@ body{
                 <a class="nav-link {{ request()->routeIs('guru.jadwal.index') ? 'active' : '' }}"
                    href="{{ route('guru.jadwal.index') }}">Kelas</a>
 
+                {{-- MENU REKAP UMUM (TETAP ADA) --}}
                 @if($firstKelasId)
-                    <a class="nav-link {{ request()->routeIs('guru.absensi.rekap') ? 'active' : '' }}"
+                    <a class="nav-link {{ request()->routeIs('guru.absensi.rekap') && !request()->has('is_wali') ? 'active' : '' }}"
                        href="{{ route('guru.absensi.rekap', ['id_kelas'=>$firstKelasId,'year'=>now()->year,'month'=>now()->month]) }}">
-                       Rekap Absensi
+                        Rekap Absensi
                     </a>
                 @else
                     <a class="nav-link disabled">Rekap Absensi</a>
+                @endif
+
+                {{-- MENU TAMBAHAN KHUSUS WALI KELAS --}}
+                @if($kelasWali)
+                {{-- Ganti link-nya jadi route yang baru kita buat --}}
+                    <a class="nav-link {{ request()->routeIs('guru.rekap.wali') ? 'active' : '' }}"
+                    href="{{ route('guru.rekap.wali') }}"
+                    style="background: rgba(255, 255, 255, 0.15); border-radius: 8px;">
+                        <i class="bi bi-star-fill me-1 text-warning"></i> Rekap Wali ({{ $kelasWali->nama_kelas }})
+                    </a>
                 @endif
             </nav>
         </div>

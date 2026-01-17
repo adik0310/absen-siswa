@@ -10,7 +10,7 @@ class Kelas extends Model
 
     protected $table = 'kelas';
     protected $primaryKey = 'id_kelas';
-    protected $fillable = ['nama_kelas'];
+    protected $fillable = ['nama_kelas','id_guru'];
 
     public function siswa()
     {
@@ -28,4 +28,9 @@ class Kelas extends Model
     {
         return $this->jadwal();
     }
+    // Tambahkan juga relasi ke Guru supaya nanti mudah memanggil nama walinya
+public function waliKelas()
+{
+    return $this->belongsTo(Guru::class, 'id_guru', 'id_guru');
+}
 }

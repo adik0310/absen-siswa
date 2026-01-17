@@ -205,6 +205,8 @@ $todayTime = $now->format('H:i:s');
                         $isWithinTime = ($todayTime >= $jamMulai && $todayTime <= $jamSelesai);
                         $btnAbsenEnabled = $isToday && $isWithinTime;
 
+                        // --- PENYESUAIAN ROUTE ---
+                        $linkScan = route('guru.absensi.scan', ['id_jadwal_mengajar' => $key]);
                         $linkAbsen = route('guru.absensi.create', ['id_jadwal_mengajar' => $key]);
                         $linkRekap = route('guru.absensi.rekap.by_jadwal', [
                             'id_jadwal' => $key,
@@ -234,18 +236,25 @@ $todayTime = $now->format('H:i:s');
                         </div>
 
                         <div class="btn-action-group">
+                            {{-- TOMBOL SCAN --}}
+                            <a href="{{ $btnAbsenEnabled ? $linkScan : '#' }}" 
+                               class="btn btn-success {{ $btnAbsenEnabled ? '' : 'disabled' }}"
+                               @if(!$btnAbsenEnabled) title="Scan hanya bisa dilakukan saat jam pelajaran hari ini" @endif>
+                                <i class="bi bi-qr-code-scan me-1"></i> Scan Kartu
+                            </a>
+
+                            {{-- Input Manual --}}
+                            <a href="{{ $btnAbsenEnabled ? $linkAbsen : '#' }}" 
+                               class="btn btn-outline-success {{ $btnAbsenEnabled ? '' : 'disabled' }}"
+                               @if(!$btnAbsenEnabled) title="Absen hanya bisa dilakukan saat jam pelajaran hari ini" @endif>
+                                <i class="bi bi-pencil-square me-1"></i> Manual
+                            </a>
+
                             {{-- Detail --}}
                             <a href="{{ $isToday ? $linkLihat : '#' }}" 
                                class="btn btn-outline-dark {{ $isToday ? '' : 'disabled' }}"
                                @if(!$isToday) title="Detail hanya bisa dilihat pada hari jadwal" @endif>
                                 <i class="bi bi-list-check me-1"></i> Detail
-                            </a>
-
-                            {{-- Input Absen --}}
-                            <a href="{{ $btnAbsenEnabled ? $linkAbsen : '#' }}" 
-                               class="btn btn-success {{ $btnAbsenEnabled ? '' : 'disabled' }}"
-                               @if(!$btnAbsenEnabled) title="Absen hanya bisa dilakukan saat jam pelajaran hari ini" @endif>
-                                <i class="bi bi-check2-square me-1"></i> Input Absen
                             </a>
 
                             {{-- Rekap --}}

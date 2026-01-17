@@ -195,7 +195,6 @@
     </div>
 </div>
 @endsection
-
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function(){
@@ -203,38 +202,62 @@ document.addEventListener('DOMContentLoaded', function(){
     const selectMapel = document.getElementById('selectMapel');
     const selectGuru  = document.getElementById('selectGuru');
 
-    // Fetch Mapel berdasarkan Kelas via AJAX
+    // 1. FILTER MAPEL BERDASARKAN KELAS
     selectKelas.addEventListener('change', function(){
         const idKelas = this.value;
         selectMapel.innerHTML = '<option value="0">-- Semua Mapel --</option>';
+        selectGuru.innerHTML = '<option value="0">-- Semua Guru --</option>';
 
         if (!idKelas) return;
 
-        selectMapel.innerHTML = '<option value="0">Memuat Mapel...</option>';
-
-        fetch("{{ url('admin') }}/kelas/" + idKelas + "/mapel")
+        fetch("{{ url('admin/rekap/get-mapel') }}/" + idKelas)
             .then(res => res.json())
             .then(data => {
-                selectMapel.innerHTML = '<option value="0">-- Semua Mapel --</option>';
-                if (Array.isArray(data)) {
-                    data.forEach(mp => {
-                        const opt = document.createElement('option');
-                        opt.value = mp.id_mapel;
-                        opt.textContent = mp.nama_mapel;
-                        selectMapel.appendChild(opt);
-                    });
-                }
-            })
-            .catch(err => {
-                console.error("Gagal mengambil mapel:", err);
-                selectMapel.innerHTML = '<option value="0">-- Semua Mapel --</option>';
+                data.forEach(mp => {
+                    const opt = document.createElement('option');
+                    opt.value = mp.id_mapel;
+                    opt.textContent = mp.nama_mapel;
+                    selectMapel.appendChild(opt);
+                });
             });
     });
 
-    // Handle Tampilkan Laporan
-    document.getElementById('btnViewRekap').addEventListener('click', function(e){
-        e.preventDefault();
+    // 2. FILTER GURU BERDASARKAN MAPEL & KELAS (PERBAIKAN UTAMA)
+    selectMapel.addEventListener('change', function(){
+        const idKelas = selectKelas.value;
+        const idMapel = this.value;
 
+        // Reset dropdown guru
+        selectGuru.innerHTML = '<option value="0">-- Semua Guru --</option>';
+
+        // Jika mapel dipilih (bukan 0) dan kelas sudah dipilih
+        if (idMapel !== "0" && idKelas) {
+            selectGuru.innerHTML = '<option value="0">Memuat Guru...</option>';
+
+            fetch(`{{ url('admin/rekap/get-guru') }}/${idKelas}/${idMapel}`)
+                .then(res => res.json())
+                .then(data => {
+                    selectGuru.innerHTML = '<option value="0">-- Semua Guru --</option>';
+                    if (data.length > 0) {
+                        data.forEach(g => {
+                            const opt = document.createElement('option');
+                            opt.value = g.id_guru;
+                            opt.textContent = g.nama_guru;
+                            selectGuru.appendChild(opt);
+                        });
+                    } else {
+                        selectGuru.innerHTML = '<option value="0">Tidak ada guru di jadwal</option>';
+                    }
+                })
+                .catch(err => {
+                    console.error("Gagal ambil guru:", err);
+                    selectGuru.innerHTML = '<option value="0">-- Semua Guru --</option>';
+                });
+        }
+    });
+
+    // 3. TOMBOL TAMPILKAN LAPORAN
+    document.getElementById('btnViewRekap').addEventListener('click', function(){
         const kelas = selectKelas.value;
         const year  = document.getElementById('selectYear').value;
         const month = document.getElementById('selectMonth').value;
@@ -242,24 +265,11 @@ document.addEventListener('DOMContentLoaded', function(){
         const guru  = selectGuru.value;
 
         if (!kelas) {
-            Swal.fire({
-                icon: 'warning',
-                title: 'Kelas Belum Dipilih',
-                text: 'Silakan pilih kelas terlebih dahulu untuk melihat rekap.',
-                confirmButtonColor: '#198754'
-            });
-            selectKelas.focus();
+            alert('Pilih kelas terlebih dahulu!');
             return;
         }
 
-        let url = "{{ url('admin/rekap') }}/" + kelas + "/" + year + "/" + month;
-        let params = [];
-
-        if(mapel !== "0") params.push("mapel=" + mapel);
-        if(guru !== "0")  params.push("guru=" + guru);
-
-        if(params.length) url += "?" + params.join("&");
-
+        let url = `{{ url('admin/rekap') }}/${kelas}/${year}/${month}?mapel=${mapel}&guru=${guru}`;
         window.location.href = url;
     });
 });

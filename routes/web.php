@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\JadwalMengajarController as AdminJadwalController;
 use App\Http\Controllers\Admin\RekapController as AdminRekapController;
 use App\Http\Controllers\Admin\GuruController;
+use App\Http\Controllers\Admin\QrCodeController;
 use App\Http\Controllers\Admin\AbsensiController as AdminAbsensiController;
 use App\Http\Controllers\Admin\GuruLoginController;
 use App\Http\Controllers\Admin\MataPelajaranController as AdminMataPelajaranController;
@@ -15,6 +16,7 @@ use App\Http\Controllers\Admin\SiswaController;
 use App\Http\Controllers\Guru\DashboardController as GuruDashboardController;
 use App\Http\Controllers\Guru\JadwalMengajarController as GuruJadwalMengajarController;
 use App\Http\Controllers\Guru\AbsensiController as GuruAbsensiController;
+use App\Http\Controllers\Guru\WaliKelasController;
 
 /*
 |--------------------------------------------------------------------------
@@ -40,6 +42,14 @@ Route::middleware(['auth'])->group(function () {
     Route::prefix('admin')->name('admin.')->middleware(['role.admin'])->group(function () {
 
             Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
+
+            // // QrCode
+    
+            Route::get('/qrcode-siswa', [QrCodeController::class, 'siswaIndex'])->name('qrcode.siswa');
+            Route::get('/qrcode-siswa/print/{id}', [QrCodeController::class, 'printCard'])->name('qrcode.print-card');
+            Route::get('/qrcode-siswa/show/{id}', [QrCodeController::class, 'showCard'])->name('qrcode.show-card');
+            Route::get('/qrcode-siswa/print/{id}', [QrCodeController::class, 'printCard'])->name('qrcode.print-card');
+
             // mapel
             Route::get('mapel', [AdminMataPelajaranController::class, 'index'])->name('mapel.index');
             Route::get('mapel/create', [AdminMataPelajaranController::class, 'create'])->name('mapel.create');
@@ -96,11 +106,15 @@ Route::middleware(['auth'])->group(function () {
             Route::delete('absensi/{id}', [AdminAbsensiController::class, 'destroy'])->name('absensi.destroy');
             Route::get('absensi/jadwal/{id}', [AdminAbsensiController::class, 'byJadwal'])->name('absensi.byJadwal');
 
-            // rekap admin
-            Route::get('rekap', [AdminRekapController::class, 'index'])->name('rekap.index');
-            Route::get('rekap/{id_kelas}/{year?}/{month?}', [AdminRekapController::class, 'show'])->name('rekap.show');
-            Route::post('rekap/pdf',  [AdminRekapController::class, 'exportPdf'])->name('rekap.pdf');
-            Route::post('rekap/excel',[ AdminRekapController::class, 'exportExcel'])->name('rekap.excel');
+            // Route Khusus Fetch (Filter Otomatis)
+            Route::get('/rekap/get-mapel/{id_kelas}', [AdminRekapController::class, 'getMapelForKelas']);
+            Route::get('/rekap/get-guru/{id_kelas}/{id_mapel}', [AdminRekapController::class, 'getGuruForMapelKelas']);
+
+            // Route Rekap
+            Route::get('/rekap', [AdminRekapController::class, 'index'])->name('rekap.index');
+            Route::get('/rekap/{id_kelas}/{year}/{month}', [AdminRekapController::class, 'show'])->name('rekap.show');
+            Route::post('/rekap/pdf', [AdminRekapController::class, 'exportPdf'])->name('rekap.pdf');
+            Route::post('/rekap/excel', [AdminRekapController::class, 'exportExcel'])->name('rekap.excel');
 
             Route::get('guru-login', [GuruLoginController::class, 'index'])->name('guru.login.index');
             Route::post('guru-login/sync', [GuruLoginController::class, 'sync'])->name('guru.login.sync');
@@ -113,6 +127,15 @@ Route::middleware(['auth'])->group(function () {
         // Dashboard
         Route::get('/dashboard', [GuruDashboardController::class, 'index'])->name('dashboard');
 
+        Route::get('/rekap-wali-kelas', [WaliKelasController::class, 'rekapKelas'])->name('rekap.wali');
+        Route::get('/rekap-absensi/detail/{id_siswa}', [WaliKelasController::class, 'detailRekapSiswa'])->name('rekap.detail');
+        // Pastikan diletakkan di dalam group middleware guru agar aman
+        Route::get('/rekap-wali-kelas/pdf', [WaliKelasController::class, 'exportPdf'])->name('rekap.pdf');
+        //scan
+        // Route untuk menampilkan halaman scanner
+        Route::get('/absensi/scan/{id_jadwal_mengajar}', [GuruAbsensiController::class, 'scan'])->name('absensi.scan');
+
+        Route::post('/absensi/scan-proses/{id_jadwal_mengajar}', [GuruAbsensiController::class, 'storeScan'])->name('absensi.scan_proses');
         // Jadwal guru
         Route::get('/jadwal', [GuruJadwalMengajarController::class, 'index'])->name('jadwal.index');
 

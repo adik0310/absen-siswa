@@ -10,7 +10,7 @@
     .container-page { padding: 1.5rem 3rem; max-width: 1200px; margin: 0 auto; }
     @media(max-width: 768px) { .container-page { padding: 1rem; } }
 
-    /* Card Styling - Menghilangkan border kasar */
+    /* Card Styling */
     .card-rekap { 
         border-radius: 12px; 
         border: none; 
@@ -53,9 +53,6 @@
     }
     .table-custom tbody tr:hover { background-color: #f8fafc; }
 
-    /* Aksen & Meta */
-    .text-success-custom { color: #10b981 !important; }
-    .bg-total-column { background-color: #f0fdf4 !important; font-weight: 800; color: #166534; }
     .text-nis { font-size: 0.78rem; color: #94a3b8; font-family: monospace; }
 </style>
 @endpush
@@ -149,7 +146,6 @@
                             <th style="width:85px">Izin</th>
                             <th style="width:85px">Sakit</th>
                             <th style="width:85px">Alfa</th>
-                            <th style="width:100px" class="bg-total-column border-0">Total</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -164,7 +160,6 @@
                                 <td><span class="badge-soft badge-soft-info">{{ $r->izin }}</span></td>
                                 <td><span class="badge-soft badge-soft-warning">{{ $r->sakit }}</span></td>
                                 <td><span class="badge-soft badge-soft-danger">{{ $r->alfa }}</span></td>
-                                <td class="bg-total-column border-0">{{ $r->total }}</td>
                             </tr>
                         @endforeach
                     </tbody>

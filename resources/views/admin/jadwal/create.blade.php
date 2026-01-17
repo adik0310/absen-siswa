@@ -151,12 +151,12 @@
 
                 <div class="col-md-4">
                     <label class="form-label">Jam Mulai <span class="text-danger">*</span></label>
-                    <input type="time" name="jam_mulai" value="{{ old('jam_mulai') }}" class="form-control form-control-sm" required>
+                    <input type="text" name="jam_mulai" value="{{ old('jam_mulai') }}" class="form-control form-control-sm" required>
                 </div>
 
                 <div class="col-md-4">
                     <label class="form-label">Jam Selesai <span class="text-danger">*</span></label>
-                    <input type="time" name="jam_selesai" value="{{ old('jam_selesai') }}" class="form-control form-control-sm" required>
+                    <input type="text" name="jam_selesai" value="{{ old('jam_selesai') }}" class="form-control form-control-sm" required>
                 </div>
             </div>
 

@@ -46,6 +46,94 @@ class AbsensiController extends Controller
         return ($currentTime >= $start && $currentTime <= $end);
     }
     /**
+     * Tampilkan halaman scanner QR Code.
+     */
+    public function scan($id_jadwal_mengajar)
+    {
+        $jadwal = JadwalMengajar::with(['mataPelajaran', 'kelas', 'guru'])
+            ->findOrFail($id_jadwal_mengajar);
+
+        // Validasi akses guru
+        $user = Auth::user();
+        $guru = $user ? $user->guru : null;
+        if ($guru && $jadwal->id_guru != $guru->id_guru) {
+            return redirect()->route('guru.jadwal.index')->with('error', 'Anda tidak berwenang.');
+        }
+
+        return view('absensi.scan', compact('jadwal'));
+    }
+
+    // File: app/Http/Controllers/Guru/AbsensiController.php
+
+public function storeScan(Request $request, $id_jadwal_mengajar)
+{
+    $jadwal = JadwalMengajar::findOrFail($id_jadwal_mengajar);
+
+    // 1. Cek Waktu & Hari
+    if (!$this->isWithinSchedule($jadwal)) {
+        return response()->json(['success' => false, 'message' => 'Scanner tidak aktif di luar jam pelajaran.'], 403);
+    }
+
+    // 2. Cari Siswa
+    $siswa = Siswa::where('nis', $request->nis)->where('id_kelas', $jadwal->id_kelas)->first();
+    if (!$siswa) {
+        return response()->json(['success' => false, 'message' => 'Siswa tidak terdaftar di kelas ini.'], 404);
+    }
+
+    $today = Carbon::today('Asia/Jakarta')->toDateString();
+    $now = Carbon::now('Asia/Jakarta');
+
+    // 3. Cek data absensi hari ini
+    $absensi = Absensi::where('id_siswa', $siswa->id_siswa)
+                      ->where('id_jadwal_mengajar', $id_jadwal_mengajar)
+                      ->whereDate('tanggal', $today)
+                      ->first();
+
+    try {
+        // --- PROSES SCAN 1 (MASUK) ---
+        if (!$absensi) {
+            Absensi::create([
+                'id_jadwal_mengajar' => $id_jadwal_mengajar,
+                'id_siswa' => $siswa->id_siswa,
+                'tanggal' => $today,
+                'jam_masuk' => $now->format('H:i:s'),
+                'keterangan' => 'alfa', // Belum dianggap hadir karena belum scan keluar
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'nama' => $siswa->nama_siswa,
+                'message' => 'Scan MASUK berhasil. Jam: ' . $now->format('H:i')
+            ]);
+        }
+
+        // --- PROSES SCAN 2 (KELUAR) ---
+        if ($absensi && is_null($absensi->jam_keluar)) {
+            $absensi->update([
+                'jam_keluar' => $now->format('H:i:s'),
+                'keterangan' => 'hadir', // Sekarang statusnya sah HADIR
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'nama' => $siswa->nama_siswa,
+                'message' => 'Scan KELUAR berhasil. Status: HADIR'
+            ]);
+        }
+
+        // Jika sudah scan masuk dan keluar
+        return response()->json([
+            'success' => false,
+            'message' => $siswa->nama_siswa . ' sudah lengkap (Masuk & Keluar).'
+        ]);
+
+    } catch (\Exception $e) {
+        return response()->json(['success' => false, 'message' => 'Gagal mencatat absensi.'], 500);
+    }
+}
+
+
+    /**
      * Tampilkan daftar absensi untuk sebuah jadwal (halaman input atau ringkasan hari ini).
      */
     public function index($id_jadwal_mengajar)
@@ -69,118 +157,79 @@ class AbsensiController extends Controller
      */
     public function create($id_jadwal_mengajar)
 {
-    $jadwal = JadwalMengajar::with(['mataPelajaran', 'kelas', 'guru'])
-        ->findOrFail($id_jadwal_mengajar);
+    $jadwal = JadwalMengajar::with(['mataPelajaran', 'kelas', 'guru'])->findOrFail($id_jadwal_mengajar);
 
+    // Cek Akses Guru
     $user = Auth::user();
     $guru = $user ? $user->guru : null;
-
     if ($guru && $jadwal->id_guru != $guru->id_guru) {
-        return redirect()->route('guru.jadwal.index')
-            ->with('error', 'Anda tidak berwenang.');
+        return redirect()->route('guru.jadwal.index')->with('error', 'Anda tidak berwenang.');
     }
 
-    // --- PERBAIKAN LOGIKA HARI ---
+    // Cek Waktu
     $now = Carbon::now('Asia/Jakarta');
-    
-    // Ambil nama hari ini dalam bahasa Indonesia, kecilkan semua huruf, hapus spasi
     $todayName = strtolower(trim($now->locale('id')->isoFormat('dddd'))); 
-    
-    // Ambil hari dari database, kecilkan, hapus spasi, hapus tanda petik
     $jadwalHari = strtolower(trim(str_replace(["'", "’"], '', $jadwal->hari)));
-
-    // Jika di database tertulis "Senin", $jadwalHari jadi "senin"
-    // Jika hari ini Senin, $todayName jadi "senin"
     $isToday = ($todayName === $jadwalHari);
 
-    // --- PERBAIKAN LOGIKA JAM ---
     $currentTime = $now->format('H:i:s');
-    // Pastikan format jam dari database H:i:s sebelum dibandingkan
     $start = Carbon::parse($jadwal->jam_mulai)->format('H:i:s');
     $end   = Carbon::parse($jadwal->jam_selesai)->format('H:i:s');
-    
     $isWithinTime = ($currentTime >= $start && $currentTime <= $end);
 
-    // DEBUG: Kalau masih mati, coba uncomment baris di bawah ini untuk cek nilainya
-    // dd($todayName, $jadwalHari, $currentTime, $start, $end);
+    // AMBIL DATA ABSENSI HARI INI
+    $today = Carbon::today('Asia/Jakarta')->toDateString();
+    $alreadyAbsen = Absensi::where('id_jadwal_mengajar', $id_jadwal_mengajar)
+        ->whereDate('tanggal', $today)
+        ->get()
+        ->keyBy('id_siswa'); // Simpan object absensi berdasarkan id_siswa
 
     $siswas = Siswa::where('id_kelas', $jadwal->id_kelas)
         ->orderBy('nama_siswa')
         ->get();
 
-    return view('absensi.create', compact('jadwal', 'siswas', 'isToday', 'isWithinTime'));
+    return view('absensi.create', compact('jadwal', 'siswas', 'isToday', 'isWithinTime', 'alreadyAbsen'));
 }
-
-
     /**
      * Simpan absensi (batch atau single).
      */
-    public function store(Request $request, $id_jadwal_mengajar)
-    {
-        $jadwal = JadwalMengajar::findOrFail($id_jadwal_mengajar);
+    public function store(Request $request)
+{
+    // 1. Ambil ID Jadwal & Tanggal
+    $id_jadwal = $request->id_jadwal_mengajar;
+    $today = \Carbon\Carbon::today('Asia/Jakarta')->toDateString();
 
-        // Validasi Waktu: Jika tidak sesuai, stop proses simpan
-        if (!$this->isWithinSchedule($jadwal)) {
-            return redirect()->route('guru.absensi.index', $id_jadwal_mengajar)
-                ->with('error', 'Gagal Simpan: Anda hanya bisa mengisi absensi pada hari dan jam pelajaran berlangsung.');
-        }
-
-        $user = Auth::user();
-        $guru = $user ? $user->guru : null;
-
-        if ($guru && $jadwal->id_guru != $guru->id_guru) {
-            return redirect()->route('guru.jadwal.index')
-                ->with('error', 'Anda tidak berwenang.');
-        }
-
-        // Mode Simpan Banyak (Batch)
-        if ($request->has('siswa_ids')) {
-            $request->validate([
-                'siswa_ids' => 'required|array|min:1',
-                'keterangan' => 'required|array',
-            ]);
-
-            $siswaIds = $request->input('siswa_ids');
-            $keteranganArr = $request->input('keterangan');
-            $today = Carbon::today('Asia/Jakarta')->toDateString();
-
-            $rows = [];
-            foreach ($siswaIds as $idSiswa) {
-                $ket = $keteranganArr[$idSiswa] ?? null;
-                if (!in_array($ket, ['hadir', 'izin', 'sakit', 'alfa'])) continue;
-
-                $rows[] = [
-                    'id_jadwal_mengajar' => $id_jadwal_mengajar,
-                    'id_siswa' => $idSiswa,
-                    'tanggal' => $today,
-                    'keterangan' => $ket,
-                    'created_at' => now('Asia/Jakarta'),
-                    'updated_at' => now('Asia/Jakarta'),
-                ];
-            }
-
-            if (empty($rows)) {
-                return redirect()->back()->with('error', 'Tidak ada data absensi yang dipilih.');
-            }
-
-            try {
-                // Menggunakan upsert agar jika guru klik simpan 2x, data yang sudah ada terupdate (bukan duplikat)
-                DB::table('absensi')->upsert(
-                    $rows,
-                    ['id_jadwal_mengajar', 'id_siswa', 'tanggal'],
-                    ['keterangan', 'updated_at']
-                );
-
-                return redirect()->route('guru.absensi.index', $id_jadwal_mengajar)
-                    ->with('success', count($rows) . ' data absensi berhasil disimpan.');
-            } catch (\Exception $e) {
-                Log::error('Absensi Save Failed: ' . $e->getMessage());
-                return redirect()->back()->with('error', 'Terjadi kesalahan sistem saat menyimpan.');
-            }
-        }
-
-        return redirect()->back()->with('error', 'Data tidak ditemukan.');
+    // 2. Validasi: Pastikan ada data keterangan yang dikirim
+    if (!$request->has('keterangan')) {
+        return redirect()->back()->with('error', 'Pilih minimal satu status absensi.');
     }
+
+    // 3. Looping data keterangan [id_siswa => status]
+    foreach ($request->keterangan as $id_siswa => $status) {
+        
+        // Gunakan updateOrCreate supaya jika guru klik simpan berkali-kali, 
+        // data lama diupdate, bukan bikin baris baru yang double.
+        \App\Models\Absensi::updateOrCreate(
+            [
+                'id_siswa'           => $id_siswa,
+                'id_jadwal_mengajar' => $id_jadwal,
+                'tanggal'            => $today,
+            ],
+            [
+                'keterangan' => $status,
+                // Logika Jam Masuk: 
+                // Jika status 'hadir', isi jam sekarang (jika sebelumnya masih kosong)
+                // Jika status bukan 'hadir', jam masuk dikosongkan (null)
+                'jam_masuk'  => ($status == 'hadir') ? (now('Asia/Jakarta')->format('H:i:s')) : null,
+                'jam_keluar' => ($status == 'hadir') ? (now('Asia/Jakarta')->format('H:i:s')) : null,
+            ]
+        );
+    }
+
+    // 4. Kembali ke halaman index daftar absensi
+    return redirect()->route('guru.absensi.index', ['id_jadwal_mengajar' => $id_jadwal])
+                     ->with('success', 'Absensi berhasil disimpan untuk seluruh siswa!');
+}
 
     /**
      * Edit satu absensi.
@@ -316,14 +365,24 @@ class AbsensiController extends Controller
 
     public function viewMonthlyRekap($id_kelas = null, $year = null, $month = null)
 {
-    $allKelas = Kelas::orderBy('nama_kelas')->get();
+    // 1. Ambil data Guru yang login
+    $user = Auth::user();
+    $idGuruLogin = $user->guru->id_guru ?? null;
+
+    // 2. Filter dropdown Kelas: Hanya tampilkan kelas yang ada di jadwal mengajar guru tersebut
+    $allKelas = Kelas::whereHas('jadwalMengajar', function($q) use ($idGuruLogin) {
+            if ($idGuruLogin) {
+                $q->where('id_guru', $idGuruLogin);
+            }
+        })
+        ->orderBy('nama_kelas')
+        ->get();
     
-    // Kita cek apakah ada input 'kelas_id' dari form GET
     $selKelasId = request()->query('kelas_id'); 
     $year = $year ?? now()->year;
     $month = $month ?? now()->month;
 
-    // JIKA tidak ada parameter kelas_id di URL, langsung tampilkan view kosong
+    // JIKA tidak ada kelas yang dipilih, tampilkan halaman awal (kosong)
     if (!$selKelasId) {
         return view('absensi.rekap_materialized', [
             'rekap' => null, 
@@ -332,18 +391,21 @@ class AbsensiController extends Controller
             'month' => $month,
             'kelas' => null, 
             'mapels' => [], 
-            'selKelas' => null, // Tambahkan ini agar Blade mengenali variabel $selKelas
+            'selKelas' => null,
             'selMapel' => null,
             'currentMapelName' => null
         ]);
     }
 
-    // JIKA ADA kelas_id, baru kita proses datanya
+    // JIKA ADA kelas yang dipilih, proses datanya
     $kelas = Kelas::with('siswa')->findOrFail($selKelasId);
     $mapelId = request()->query('mapel_id');
     
-    // Ambil daftar mapel untuk dropdown filter
+    // 3. Filter dropdown Mapel: Hanya tampilkan mapel yang diajar guru tersebut di kelas yang dipilih
     $mapelIds = JadwalMengajar::where('id_kelas', $selKelasId)
+                ->when($idGuruLogin, function($q) use ($idGuruLogin) {
+                    return $q->where('id_guru', $idGuruLogin);
+                })
                 ->pluck('id_mapel')
                 ->unique()
                 ->filter()
@@ -356,6 +418,7 @@ class AbsensiController extends Controller
 
     $currentMapelName = $mapelId ? optional(MataPelajaran::find($mapelId))->nama_mapel : null;
 
+    // 4. Ambil data rekap (pastikan fungsi collectRekapWithFilters juga mendukung filter guru/mapel)
     $data = $this->collectRekapWithFilters($selKelasId, $year, $month, $mapelId);
     $rekap = $data['rekap']->unique('id_siswa');
 
@@ -366,8 +429,8 @@ class AbsensiController extends Controller
         'month' => $month,
         'mapels' => $mapels,
         'mapelId' => $mapelId,
-        'selKelas' => $selKelasId, // Pastikan dikirim ke view
-        'selMapel' => $mapelId,    // Pastikan dikirim ke view
+        'selKelas' => $selKelasId,
+        'selMapel' => $mapelId,
         'currentMapelName' => $currentMapelName,
         'allKelas' => $allKelas
     ]);

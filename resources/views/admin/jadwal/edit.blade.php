@@ -129,7 +129,7 @@
             </div>
         @endif
 
-        <form action="{{ route('admin.jadwal.update', $jadwal->id_jadwal_mengajar) }}" method="POST">
+        <form id="formEditJadwal" action="{{ route('admin.jadwal.update', $jadwal->id_jadwal_mengajar) }}" method="POST">
             @csrf
             @method('PUT')
 
@@ -153,12 +153,19 @@
 
                 <div class="col-md-4">
                     <label class="form-label">Jam Mulai <span class="text-danger">*</span></label>
-                    <input type="time" name="jam_mulai" value="{{ old('jam_mulai', $jadwal->jam_mulai) }}" class="form-control form-control-sm" required>
+                    {{-- Input diubah ke type text agar manual tanpa ikon jam --}}
+                    <input type="text" id="jam_mulai" name="jam_mulai" 
+                        value="{{ old('jam_mulai', substr($jadwal->jam_mulai, 0, 5)) }}" 
+                        class="form-control form-control-sm jam-input" 
+                        placeholder="HH:mm (Contoh: 07:30)" required>
                 </div>
 
                 <div class="col-md-4">
                     <label class="form-label">Jam Selesai <span class="text-danger">*</span></label>
-                    <input type="time" name="jam_selesai" value="{{ old('jam_selesai', $jadwal->jam_selesai) }}" class="form-control form-control-sm" required>
+                    <input type="text" id="jam_selesai" name="jam_selesai" 
+                        value="{{ old('jam_selesai', substr($jadwal->jam_selesai, 0, 5)) }}" 
+                        class="form-control form-control-sm jam-input" 
+                        placeholder="HH:mm (Contoh: 09:00)" required>
                 </div>
             </div>
 
@@ -228,4 +235,23 @@
         </form>
     </div>
 </div>
+
+<script>
+    // 1. Saat mengetik, otomatis ganti titik (.) jadi titik dua (:)
+    document.querySelectorAll('.jam-input').forEach(function(input) {
+        input.addEventListener('input', function(e) {
+            this.value = this.value.replace('.', ':');
+        });
+    });
+
+    // 2. Saat form disubmit, pastikan lagi tidak ada titik yang lolos
+    document.getElementById('formEditJadwal').addEventListener('submit', function(e) {
+        let jamMulai = document.getElementById('jam_mulai');
+        let jamSelesai = document.getElementById('jam_selesai');
+
+        if (jamMulai.value) jamMulai.value = jamMulai.value.replace('.', ':');
+        if (jamSelesai.value) jamSelesai.value = jamSelesai.value.replace('.', ':');
+    });
+</script>
+
 @endsection
