@@ -10,8 +10,10 @@ use App\Http\Controllers\Admin\GuruController;
 use App\Http\Controllers\Admin\QrCodeController;
 use App\Http\Controllers\Admin\AbsensiController as AdminAbsensiController;
 use App\Http\Controllers\Admin\GuruLoginController;
+use App\Http\Controllers\Admin\KelasController;
 use App\Http\Controllers\Admin\MataPelajaranController as AdminMataPelajaranController;
 use App\Http\Controllers\Admin\SiswaController;
+use App\Http\Controllers\Admin\WaliKelasController as AdminWaliKelasController;
 
 use App\Http\Controllers\Guru\DashboardController as GuruDashboardController;
 use App\Http\Controllers\Guru\JadwalMengajarController as GuruJadwalMengajarController;
@@ -44,7 +46,6 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
 
             // // QrCode
-    
             Route::get('/qrcode-siswa', [QrCodeController::class, 'siswaIndex'])->name('qrcode.siswa');
             Route::get('/qrcode-siswa/print/{id}', [QrCodeController::class, 'printCard'])->name('qrcode.print-card');
             Route::get('/qrcode-siswa/show/{id}', [QrCodeController::class, 'showCard'])->name('qrcode.show-card');
@@ -67,6 +68,10 @@ Route::middleware(['auth'])->group(function () {
             Route::get('guru/{id}/edit', [GuruController::class, 'edit'])->name('guru.edit');
             Route::put('guru/{id}/update', [GuruController::class, 'update'])->name('guru.update');
             Route::delete('guru/{id}/delete', [GuruController::class, 'destroy'])->name('guru.delete');
+
+            //wali kelas
+            Route::get('/wali-kelas', [AdminWaliKelasController::class, 'index'])->name('wali.index');
+            Route::post('/wali-kelas/update', [AdminWaliKelasController::class, 'update'])->name('wali.update');
 
             // siswa
             Route::get('siswa', [SiswaController::class, 'index'])->name('siswa.index');
@@ -105,6 +110,7 @@ Route::middleware(['auth'])->group(function () {
             Route::put('absensi/{id}', [AdminAbsensiController::class, 'update'])->name('absensi.update');
             Route::delete('absensi/{id}', [AdminAbsensiController::class, 'destroy'])->name('absensi.destroy');
             Route::get('absensi/jadwal/{id}', [AdminAbsensiController::class, 'byJadwal'])->name('absensi.byJadwal');
+            Route::get('/get-guru-filter', [AdminAbsensiController::class, 'getGuruByJadwal'])->name('get.guru.jadwal');
 
             // Route Khusus Fetch (Filter Otomatis)
             Route::get('/rekap/get-mapel/{id_kelas}', [AdminRekapController::class, 'getMapelForKelas']);
@@ -134,46 +140,32 @@ Route::middleware(['auth'])->group(function () {
         //scan
         // Route untuk menampilkan halaman scanner
         Route::get('/absensi/scan/{id_jadwal_mengajar}', [GuruAbsensiController::class, 'scan'])->name('absensi.scan');
-
         Route::post('/absensi/scan-proses/{id_jadwal_mengajar}', [GuruAbsensiController::class, 'storeScan'])->name('absensi.scan_proses');
         // Jadwal guru
         Route::get('/jadwal', [GuruJadwalMengajarController::class, 'index'])->name('jadwal.index');
-
         // List absensi hari ini untuk jadwal tertentu
         Route::get('/jadwal/{id_jadwal_mengajar}/absensi', [GuruAbsensiController::class, 'index'])->name('absensi.index');
-
         // Form input absensi
         Route::get('/jadwal/{id_jadwal_mengajar}/absensi/create',[GuruAbsensiController::class, 'create'])->name('absensi.create');
-
         // Submit absensi (batch atau single)
         Route::post('/jadwal/{id_jadwal_mengajar}/absensi',[GuruAbsensiController::class, 'store'])->name('absensi.store');
-
         // Edit item absensi tertentu
         Route::get('/absensi/{id}/edit',[GuruAbsensiController::class, 'edit'])->name('absensi.edit');
-
         // Update absensi
         Route::put('/absensi/{id}',[GuruAbsensiController::class, 'update'])->name('absensi.update');
-
         // Hapus absensi
         Route::delete('/absensi/{id}',[GuruAbsensiController::class, 'destroy'])->name('absensi.destroy');
-
-
         // Generate rekap (materialisasi)
         Route::post('/rekap/generate/{id_kelas?}/{year?}/{month?}',[GuruAbsensiController::class, 'generateMonthlyRekap'])->name('absensi.rekap.generate');
-
         // Lihat rekap
         Route::get('/rekap/{id_kelas?}/{year?}/{month?}',[GuruAbsensiController::class, 'viewMonthlyRekap'])->name('absensi.rekap');
-
         // export
         Route::get('/kelas/{id_kelas?}/rekap/pdf/{year?}/{month?}', [GuruAbsensiController::class, 'exportMonthlyRekapPdf'])->name('absensi.rekap.pdf');
         Route::get('/kelas/{id_kelas?}/rekap/excel/{year?}/{month?}', [GuruAbsensiController::class, 'exportMonthlyRekapExcel'])->name('absensi.rekap.excel');
-
         // ReKap by jadwal
         Route::get('/jadwal/{id_jadwal}/rekap', [GuruAbsensiController::class, 'viewRekapByJadwal'])->name('absensi.rekap.by_jadwal');
-
         // PDF download (DomPDF)
         Route::get('/jadwal/{id_jadwal}/rekap/pdf/{year?}/{month?}', [GuruAbsensiController::class, 'exportPdfByJadwal'])->name('absensi.rekap.pdf_download_by_jadwal');
-
         // Excel download
         Route::get('/jadwal/{id_jadwal}/rekap/excel/{year?}/{month?}', [GuruAbsensiController::class, 'exportExcelByJadwal'])->name('absensi.rekap.excel_by_jadwal');
     });

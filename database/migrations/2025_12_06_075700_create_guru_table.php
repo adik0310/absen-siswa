@@ -16,9 +16,7 @@ class CreateGuruTable extends Migration
 
             $table->index('id_users');
 
-            $table->foreign('id_users')
-                ->references('id_users')->on('users')
-                ->onDelete('cascade');
+            $table->foreign('id_users')->references('id_users')->on('users')->onDelete('cascade');
 
             $table->timestamps();
             $table->softDeletes();

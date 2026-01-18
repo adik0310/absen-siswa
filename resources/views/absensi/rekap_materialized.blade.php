@@ -5,7 +5,7 @@
 @push('head')
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
 <style>
-    .container-fluid { padding: 0 45px; }
+    .container-fluid { padding: 0 100px; }
 
     /* Card Styling - Ukuran lebih compact */
     .card-rekap { border-radius: 8px; border: none; box-shadow: 0 2px 8px rgba(0,0,0,0.05); background: #fff; }

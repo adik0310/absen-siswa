@@ -26,7 +26,7 @@
     }
 
     .dashboard-container {
-        max-width: 1200px;
+        max-width: 900px;
         margin: 20px auto;
         padding: 0 15px;
     }
@@ -264,9 +264,9 @@
                             </td>
                             <td>
                             
-                            <a href="{{ route('guru.absensi.index', ['id_jadwal_mengajar' => $j->id_jadwal_mengajar]) }}" 
+                            <a href="{{ route('guru.absensi.create', ['id_jadwal_mengajar' => $j->id_jadwal_mengajar]) }}" 
                             class="btn btn-sm btn-outline-success rounded-pill px-3">
-                                <i class="bi bi-pencil-square me-1"></i> Absensi
+                                <i class="bi bi-pencil-square me-1"></i> Manual
                             </a>
                             <a href="{{ route('guru.absensi.scan', ['id_jadwal_mengajar' => $j->id_jadwal_mengajar]) }}" 
                             class="btn btn-sm btn-outline-success rounded-pill px-3">

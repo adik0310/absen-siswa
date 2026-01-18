@@ -10,8 +10,6 @@ class CreateKelasTable extends Migration
     {
         Schema::create('kelas', function (Blueprint $table) {
             $table->increments('id_kelas');
-            // jika hanya kelas X/10 yang masuk sistem, Anda bisa menyesuaikan enum,
-            // tapi saya tetap beri beberapa opsi (X-A..X-E) — ubah jika perlu.
             $table->enum('nama_kelas', ['X-A','X-B','X-C','X-D','X-E'])->nullable(false);
             $table->timestamps();
             $table->softDeletes();

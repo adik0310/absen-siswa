@@ -139,34 +139,30 @@
         <form method="GET" action="{{ route('admin.absensi.index') }}" class="row g-3 align-items-end">
             <div class="col-md-3">
                 <label class="form-label small fw-bold text-muted">Kelas</label>
-                <select name="id_kelas" class="form-select form-select-sm">
+                <select name="id_kelas" id="id_kelas_filter" class="form-select form-select-sm">
                     <option value="">Semua Kelas</option>
                     @foreach($kelas as $k)
-                        <option value="{{ $k->id_kelas }}" @selected(request('id_kelas') == $k->id_kelas)>
-                            {{ $k->nama_kelas }}
-                        </option>
+                        <option value="{{ $k->id_kelas }}" @selected(request('id_kelas') == $k->id_kelas)>{{ $k->nama_kelas }}</option>
                     @endforeach
                 </select>
             </div>
+
             <div class="col-md-3">
                 <label class="form-label small fw-bold text-muted">Mata Pelajaran</label>
-                <select name="id_mapel" class="form-select form-select-sm">
+                <select name="id_mapel" id="id_mapel_filter" class="form-select form-select-sm">
                     <option value="">Semua Mapel</option>
                     @foreach($mapel as $m)
-                        <option value="{{ $m->id_mata_pelajaran }}" @selected(request('id_mapel') == $m->id_mata_pelajaran)>
-                            {{ $m->nama_mapel }}
-                        </option>
+                        <option value="{{ $m->id_mata_pelajaran }}" @selected(request('id_mapel') == $m->id_mata_pelajaran)>{{ $m->nama_mapel }}</option>
                     @endforeach
                 </select>
             </div>
+
             <div class="col-md-3">
                 <label class="form-label small fw-bold text-muted">Guru Pengampu</label>
-                <select name="id_guru" class="form-select form-select-sm">
+                <select name="id_guru" id="id_guru_filter" class="form-select form-select-sm">
                     <option value="">Semua Guru</option>
                     @foreach($guru as $g)
-                        <option value="{{ $g->id_guru }}" @selected(request('id_guru') == $g->id_guru)>
-                            {{ $g->nama_guru }}
-                        </option>
+                        <option value="{{ $g->id_guru }}" @selected(request('id_guru') == $g->id_guru)>{{ $g->nama_guru }}</option>
                     @endforeach
                 </select>
             </div>
@@ -283,3 +279,29 @@
 
 </div>
 @endsection
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+$(document).ready(function() {
+    // Jalankan setiap kali dropdown Kelas atau Mapel berubah
+    $('#id_kelas_filter, #id_mapel_filter').on('change', function() {
+        let kelasId = $('#id_kelas_filter').val();
+        let mapelId = $('#id_mapel_filter').val();
+        let guruSelect = $('#id_guru_filter');
+
+        // Jika dua-duanya sudah dipilih, kita minta data ke server
+        if (kelasId && mapelId) {
+            $.ajax({
+                url: "{{ route('admin.get.guru.jadwal') }}", // Kita akan buat route ini
+                type: "GET",
+                data: { id_kelas: kelasId, id_mapel: mapelId },
+                success: function(res) {
+                    guruSelect.empty().append('<option value="">Semua Guru</option>');
+                    $.each(res, function(id, nama) {
+                        guruSelect.append('<option value="'+ id +'">'+ nama +'</option>');
+                    });
+                }
+            });
+        }
+    });
+});
+</script>

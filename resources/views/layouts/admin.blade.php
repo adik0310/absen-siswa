@@ -228,6 +228,7 @@ main.container-main{
         request()->routeIs('admin.mapel.*') ||
         request()->routeIs('admin.siswa.*') ||
         request()->routeIs('admin.guru.*') ||
+        request()->routeIs('admin.wali.*') ||
         request()->routeIs('admin.absensi.*');
 @endphp
 
@@ -305,6 +306,7 @@ main.container-main{
                                 <li><a class="dropdown-item" href="{{ route('admin.mapel.index') }}"><i class="bi bi-book"></i> Mata Pelajaran</a></li>
                                 <li><a class="dropdown-item" href="{{ route('admin.siswa.index') }}"><i class="bi bi-people"></i> Siswa</a></li>
                                 <li><a class="dropdown-item" href="{{ route('admin.guru.index') }}"><i class="bi bi-person-badge"></i> Guru</a></li>
+                                <li><a class="dropdown-item" href="{{ route('admin.wali.index') }}"><i class="bi bi-person-check"></i> Wali Kelas</a></li>
                                 <li><a class="dropdown-item" href="{{ route('admin.absensi.index') }}"><i class="bi bi-journal-check"></i> Absensi</a></li>
                             </ul>
                         </div>

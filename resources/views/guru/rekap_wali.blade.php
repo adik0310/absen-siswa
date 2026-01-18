@@ -4,7 +4,7 @@
 
 @push('head')
 <style>
-    .container-fluid { padding: 0 45px; }
+    .container-fluid { padding: 0 115px; }
     
     /* Card Styling */
     .card-custom { border-radius: 12px; border: none; box-shadow: 0 4px 12px rgba(0,0,0,0.05); background: #fff; }

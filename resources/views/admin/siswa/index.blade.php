@@ -12,8 +12,8 @@
 .container-page {
     padding-left: 8rem;
     padding-right: 8rem;
-    max-width: 1065px;
-    margin-left: 1rem;
+    max-width: 1000px;
+    margin-left: 5rem;
     margin-right: 10rem;
 }
 @media(max-width: 1400px) { .container-page { padding-left: 4rem; padding-right: 4rem; } }

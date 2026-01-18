@@ -125,9 +125,6 @@ class SiswaSeeder extends Seeder
             ];
         }
 
-        // ===============================
-        // X-C (DATA ASLI)
-        // ===============================
         $dataXC = [
             ['0096149541','AGUNG SABRIAN','L'],
             ['0092930367','ALDI PUTRA SEPTIAN','L'],
@@ -170,9 +167,6 @@ class SiswaSeeder extends Seeder
             ];
         }
 
-        // ===============================
-        // X-D (DATA ASLI)
-        // ===============================
         $dataXD = [
             ['3080479480','ADELIA MAULANI PUTRI','P'],
             ['0107295354','AINUN NISA SYABANI','P'],

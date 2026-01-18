@@ -35,11 +35,10 @@ class MataPelajaranSeeder extends Seeder
             'Akidah Akhlak',
             'SKI',
             'Qur\'an Hadits',
-            'IPA (Biologi)', // beberapa jadwal menyebut "IPA (Biologi)"
+            'IPA (Biologi)',
             'Sosiologi',
         ];
 
-        // unikkan nama mapel (hindari duplikat di array)
         $mapelList = array_values(array_unique($mapelList));
 
         $now = now();

@@ -1,4 +1,4 @@
-{{-- resources/views/guru/rekap/show.blade.php --}}
+{{-- resources/views/guru/rekap/by_jadwal.blade.php --}}
 @extends('layouts.guru')
 
 @section('title', 'Rekap Absensi — Jadwal')
@@ -7,7 +7,11 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
 <style>
     /* Kontainer utama tetap lega namun rapi */
-    .container-page { padding: 1.5rem 3rem; max-width: 1200px; margin: 0 auto; }
+    .container-page { 
+        padding: 1.5rem 4rem;
+        max-width: 1000px;
+        margin: 0 auto; }
+
     @media(max-width: 768px) { .container-page { padding: 1rem; } }
 
     /* Card Styling */
@@ -24,7 +28,7 @@
         padding: 5px 10px;
         border-radius: 6px;
         font-weight: 700;
-        font-size: 0.82rem;
+        font-size: 0.8rem;
         display: inline-block;
         min-width: 38px;
         text-align: center;
@@ -39,47 +43,40 @@
     .table-custom thead th {
         background-color: #f8fafc;
         text-transform: uppercase;
-        font-size: 0.75rem;
+        font-size: 0.8rem;
+        font-weight: 700;
         letter-spacing: 0.05em;
-        color: #64748b;
+        color: #0d0d0d;
         padding: 14px 10px;
         border: none;
     }
     .table-custom tbody td { 
         border-bottom: 1px solid #f1f5f9; 
         padding: 12px 10px; 
-        font-size: 0.88rem; 
-        color: #334155;
+        font-size: 0.8rem; 
+        color: #0d0d0d;
     }
     .table-custom tbody tr:hover { background-color: #f8fafc; }
 
-    .text-nis { font-size: 0.78rem; color: #94a3b8; font-family: monospace; }
+    .text-nis { font-size: 0.8rem; color: #94a3b8; font-family: monospace; }
 </style>
 @endpush
 
 @section('content')
-@php
-    $monthNames = [
-        1=>'Januari',2=>'Februari',3=>'Maret',4=>'April',5=>'Mei',6=>'Juni',
-        7=>'Juli',8=>'Agustus',9=>'September',10=>'Oktober',11=>'November',12=>'Desember'
-    ];
-@endphp
-
 <div class="container-page">
-
-    {{-- === 1. TOP HEADER === --}}
     <div class="d-flex justify-content-between align-items-end mb-4">
         <div>
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb mb-1" style="font-size: 0.75rem;">
                     <li class="breadcrumb-item"><a href="{{ route('guru.jadwal.index') }}" class="text-decoration-none text-muted">Jadwal</a></li>
-                    <li class="breadcrumb-item active text-success" aria-current="page">Rekap Bulanan</li>
+                    <li class="breadcrumb-item active text-success" aria-current="page">Rekap Harian</li>
                 </ol>
             </nav>
-            <h4 class="fw-bold text-dark mb-0">
+            <h4 class="fw-bold text-dark mb-0" style="font-size: 1.8rem;">
                 <i class="bi bi-file-earmark-bar-graph text-success me-2"></i>Rekap Absensi Siswa
             </h4>
-            <p class="text-muted mb-0 small">Periode Laporan: <strong>{{ $monthNames[$month] ?? $month }} {{ $year }}</strong></p>
+            {{-- Menggunakan format tanggal harian --}}
+            <p class="text-muted mb-0 small">Tanggal Laporan: <strong>{{ \Carbon\Carbon::parse($tanggalCetak)->translatedFormat('d F Y') }}</strong></p>
         </div>
 
         <a href="{{ route('guru.jadwal.index') }}" class="btn btn-sm btn-white border shadow-sm px-3 rounded-pill">
@@ -129,7 +126,7 @@
                 </div>
                 <h5 class="fw-bold text-dark">Data Belum Tersedia</h5>
                 <p class="text-muted mx-auto mb-0" style="max-width: 400px;">
-                    Sepertinya belum ada data absensi yang diinput untuk jadwal ini pada bulan {{ $monthNames[$month] }}.
+                    Sepertinya belum ada data absensi yang diinput untuk jadwal ini pada tanggal <strong>{{ \Carbon\Carbon::parse($tanggalCetak)->translatedFormat('d F Y') }}</strong>.
                 </p>
             </div>
         </div>

@@ -98,4 +98,16 @@ class AbsensiController extends Controller
         Absensi::findOrFail($id)->delete();
         return redirect()->route('admin.absensi.index')->with('success','Data dihapus.');
     }
+
+    public function getGuruByJadwal(Request $request)
+{
+    // Cari guru yang punya jadwal di kelas & mapel tersebut
+    $guru = JadwalMengajar::where('id_kelas', $request->id_kelas)
+            ->where('id_mapel', $request->id_mapel)
+            ->with('guru')
+            ->get()
+            ->pluck('guru.nama_guru', 'guru.id_guru'); // Ambil Nama dan ID-nya saja
+
+    return response()->json($guru);
+}
 }

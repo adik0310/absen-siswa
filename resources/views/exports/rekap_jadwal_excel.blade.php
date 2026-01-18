@@ -3,56 +3,53 @@
     $monthInt = (int)$month;
     $yearInt = (int)$year;
     
-    // Total colspan diperbarui: No(1) + Nama(1) + NIS(1) + Hari(n)
-    // S,I,A,H dihapus jadi tidak ditambah 4 lagi
-    $totalColspan = 3 + $daysInMonth;
+    // Total kolom tetap 7: No, Nama Lengkap, NIS, H, S, I, A
+    $totalColumns = 7;
     $namaBulan = Carbon::createFromDate($yearInt, $monthInt, 1)->translatedFormat('F');
+    $tanggalSekarang = Carbon::now()->translatedFormat('d F Y');
 @endphp
 
 <table>
     {{-- KOP SURAT --}}
     <tr>
-        <th colspan="{{ $totalColspan }}" style="text-align: center; font-weight: bold; font-size: 14px;">
-            REKAPITULASI ABSENSI SISWA PER HARI
-        </th>
+        <th colspan="{{ $totalColumns }}" style="text-align: center; font-weight: bold; font-size: 14pt;">REKAPITULASI ABSENSI SISWA HARIAN</th>
     </tr>
     <tr>
-        <th colspan="{{ $totalColspan }}" style="text-align: center; font-weight: bold; font-size: 12px;">
-            MADRASAH ALIYAH NURUL IMAN <br>
-            <p><i>Jalan Cibaduyut Raya Blok TVRI III RT.03 RW.03, Kelurahan Cibaduyut Kidul, Kecamatan Bojongloa Kidul, Kota Bandung Jawa Barat.</i></p>
-        </th>
+        <th colspan="{{ $totalColumns }}" style="text-align: center; font-weight: bold; font-size: 16pt;">MADRASAH ALIYAH NURUL IMAN</th>
     </tr>
-    <tr><td colspan="{{ $totalColspan }}"></td></tr>
+    <tr>
+        <th colspan="{{ $totalColumns }}" style="text-align: center; font-size: 10pt; font-style: italic;">Jalan Cibaduyut Raya Blok TVRI III, Kota Bandung, Jawa Barat</th>
+    </tr>
+    <tr><td colspan="{{ $totalColumns }}" style="border-bottom: 2px solid #000;"></td></tr>
+    <tr><td colspan="{{ $totalColumns }}"></td></tr>
 
     {{-- INFO JADWAL --}}
     <tr>
-        <td style="font-weight: bold;">Kelas:</td>
-        <td style="text-align: left;">{{ $jadwal->kelas->nama_kelas }}</td>
-        <td colspan="{{ $daysInMonth - 2 }}"></td> {{-- Penyesuaian jarak --}}
-        <td style="font-weight: bold;">Bulan:</td>
-        <td style="text-align: left;">{{ $namaBulan }} {{ $yearInt }}</td>
+        <td style="font-weight: bold;">Mata Pelajaran</td>
+        <td colspan="2">: {{ $jadwal->mataPelajaran->nama_mapel }}</td>
+        <td colspan="2"></td> 
+        <td style="font-weight: bold; text-align: right;">Tanggal Cetak</td>
+        <td>: {{ $tanggalSekarang }}</td>
     </tr>
     <tr>
-        <td style="font-weight: bold;">Mapel:</td>
-        <td style="text-align: left;">{{ $jadwal->mataPelajaran->nama_mapel }}</td>
-        <td colspan="{{ $daysInMonth - 2 }}"></td>
-        <td style="font-weight: bold;">Guru:</td>
-        <td style="text-align: left;">{{ $jadwal->guru->nama_guru }}</td>
+        <td style="font-weight: bold;">Kelas</td>
+        <td colspan="2">: {{ $jadwal->kelas->nama_kelas }}</td>
+        <td colspan="2"></td>
+        <td style="font-weight: bold; text-align: right;">Tahun Ajaran</td>
+        <td>: {{ $yearInt }}/{{ $yearInt + 1 }}</td>
     </tr>
-    <tr><td colspan="{{ $totalColspan }}"></td></tr>
+    <tr><td colspan="{{ $totalColumns }}"></td></tr>
 
     {{-- HEADER TABEL --}}
     <thead>
         <tr>
-            <th rowspan="2" style="background-color: #d3d3d3; border: 2px solid #000; text-align: center; vertical-align: middle; width: 50px;">No</th>
-            <th rowspan="2" style="background-color: #d3d3d3; border: 2px solid #000; text-align: center; vertical-align: middle; width: 250px;">Nama Siswa</th>
-            <th rowspan="2" style="background-color: #d3d3d3; border: 2px solid #000; text-align: center; vertical-align: middle; width: 100px;">NIS</th>
-            <th colspan="{{ $daysInMonth }}" style="background-color: #d3d3d3; border: 2px solid #000; text-align: center; font-weight: bold;">Tanggal</th>
-        </tr>
-        <tr>
-            @for($d = 1; $d <= $daysInMonth; $d++)
-                <th style="background-color: #f0f0f0; border: 2px solid #000; text-align: center; width: 30px;">{{ $d }}</th>
-            @endfor
+            <th style="border: 2px solid #000; text-align: center; background-color: #f0f0f0; font-weight: bold; width: 40px;">NO</th>
+            <th style="border: 2px solid #000; text-align: center; background-color: #f0f0f0; font-weight: bold; width: 300px;">NAMA LENGKAP SISWA</th>
+            <th style="border: 2px solid #000; text-align: center; background-color: #f0f0f0; font-weight: bold; width: 120px;">NIS</th>
+            <th style="border: 2px solid #000; text-align: center; background-color: #f0f0f0; font-weight: bold; width: 50px;">H</th>
+            <th style="border: 2px solid #000; text-align: center; background-color: #f0f0f0; font-weight: bold; width: 50px;">S</th>
+            <th style="border: 2px solid #000; text-align: center; background-color: #f0f0f0; font-weight: bold; width: 50px;">I</th>
+            <th style="border: 2px solid #000; text-align: center; background-color: #f0f0f0; font-weight: bold; width: 50px;">A</th>
         </tr>
     </thead>
 
@@ -61,48 +58,36 @@
         @foreach($rekap as $index => $r)
         <tr>
             <td style="border: 1px solid #000; text-align: center;">{{ $index + 1 }}</td>
-            <td style="border: 1px solid #000;">{{ strtoupper($r->nama_siswa) }}</td>
+            <td style="border: 1px solid #000; padding-left: 5px;">{{ strtoupper($r->nama_siswa) }}</td>
+            {{-- Menggunakan petik agar NIS tetap terbaca teks di Excel --}}
             <td style="border: 1px solid #000; text-align: center;">{{ $r->nis }}</td>
-            
-            {{-- Loop Status Harian --}}
-            @for($d = 1; $d <= $daysInMonth; $d++)
-                @php
-                    $tglStr = Carbon::createFromDate($yearInt, $monthInt, $d)->toDateString();
-                    $status = $r->harian[$tglStr] ?? '';
-                    $initial = match($status) {
-                        'hadir' => 'H',
-                        'sakit' => 'S',
-                        'izin'  => 'I',
-                        'alfa'  => 'A',
-                        default => ''
-                    };
-                @endphp
-                <td style="border: 1px solid #000; text-align: center; {{ $status == 'alfa' ? 'color: #FF0000; font-weight: bold;' : '' }}">
-                    {{ $initial }}
-                </td>
-            @endfor
+            <td style="border: 1px solid #000; text-align: center; font-weight: bold;">{{ $r->hadir }}</td>
+            <td style="border: 1px solid #000; text-align: center; color: {{ $r->sakit > 0 ? '#000' : '#d3d3d3' }};">{{ $r->sakit }}</td>
+            <td style="border: 1px solid #000; text-align: center; color: {{ $r->izin > 0 ? '#000' : '#d3d3d3' }};">{{ $r->izin }}</td>
+            <td style="border: 1px solid #000; text-align: center; color: {{ $r->alfa > 0 ? '#FF0000' : '#d3d3d3' }}; font-weight: {{ $r->alfa > 0 ? 'bold' : 'normal' }};">
+                {{ $r->alfa }}
+            </td>
         </tr>
         @endforeach
     </tbody>
 
     {{-- TANDA TANGAN --}}
-    <tr><td colspan="{{ $totalColspan }}"></td></tr>
+    <tr><td colspan="{{ $totalColumns }}"></td></tr>
     <tr>
-        <td colspan="{{ $totalColspan - 3 }}"></td>
-        <td colspan="3" style="text-align: center;">Bandung, {{ date('d/m/Y') }}</td>
+        <td colspan="4"></td>
+        <td colspan="3" style="text-align: center;">Bandung, {{ $tanggalSekarang }}</td>
     </tr>
     <tr>
-        <td colspan="{{ $totalColspan - 3 }}"></td>
+        <td colspan="4"></td>
         <td colspan="3" style="text-align: center;">Guru Mata Pelajaran,</td>
     </tr>
-    <tr><td colspan="{{ $totalColspan }}"></td></tr>
-    <tr><td colspan="{{ $totalColspan }}"></td></tr>
+    <tr><td colspan="{{ $totalColumns }}" style="height: 40px;"></td></tr>
     <tr>
-        <td colspan="{{ $totalColspan - 3 }}"></td>
-        <td colspan="3" style="text-align: center;"><strong><u>{{ $namaGuruLogin }}</u></strong></td>
+        <td colspan="4"></td>
+        <td colspan="3" style="text-align: center; font-weight: bold; text-decoration: underline;">{{ $namaGuruLogin }}</td>
     </tr>
     <tr>
-        <td colspan="{{ $totalColspan - 3 }}"></td>
+        <td colspan="4"></td>
         <td colspan="3" style="text-align: center;">NIP. {{ $nipGuru }}</td>
     </tr>
 </table>

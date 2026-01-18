@@ -12,9 +12,9 @@
 .container {
     padding-left: 8rem;
     padding-right: 8rem;
-    max-width: 1065px;
+    max-width: 1000px;
     margin-left: 0.01rem;
-    margin-right: 48rem;
+    margin-right: 40rem;
 }
 @media(max-width: 1400px) { .container { padding-left: 4rem; padding-right: 4rem; } }
 @media(max-width: 992px) { .container { padding-left: 2rem; padding-right: 2rem; } }

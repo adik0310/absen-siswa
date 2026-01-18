@@ -36,9 +36,9 @@ $todayTime = $now->format('H:i:s');
 }
 
 .container-narrow{
-    max-width:1100px;
+    max-width:1000px;
     margin:30px auto;
-    padding:0 60px;
+    padding:0 50px;
 }
 
 .page-title-box{
@@ -50,7 +50,7 @@ $todayTime = $now->format('H:i:s');
 
 .page-sub{
     color:var(--muted);
-    font-size:.95rem;
+    font-size:.9rem;
 }
 
 .card-list-container{
@@ -97,7 +97,7 @@ $todayTime = $now->format('H:i:s');
     display:flex;
     flex-wrap:wrap;
     gap:14px;
-    font-size:.92rem;
+    font-size:.9rem;
     color:var(--muted);
 }
 
@@ -106,8 +106,8 @@ $todayTime = $now->format('H:i:s');
     color:#fff;
     padding:4px 10px;
     border-radius:6px;
-    font-size:.85rem;
-    font-weight:600;
+    font-size:.8rem;
+    font-weight:500;
 }
 
 .date-tag{
@@ -115,8 +115,8 @@ $todayTime = $now->format('H:i:s');
     padding:4px 10px;
     border-radius:6px;
     color:var(--accent);
-    font-weight:600;
-    font-size:.85rem;
+    font-weight:500;
+    font-size:.8rem;
     background:white;
 }
 
@@ -129,11 +129,11 @@ $todayTime = $now->format('H:i:s');
 }
 
 .btn-action-group .btn{
-    padding:.45rem 1rem;
+    padding:.40rem 1rem;
     border-radius:10px;
-    font-weight:600;
-    font-size:.9rem;
-    min-width:140px;
+    font-weight:500;
+    font-size:.8rem;
+    min-width:130px;
 }
 
 .btn.disabled, .btn:disabled {
@@ -173,7 +173,7 @@ $todayTime = $now->format('H:i:s');
     <div class="page-title-box">
         <i class="bi bi-calendar-check-fill" style="color:var(--primary); font-size:2rem"></i>
         <div>
-            <h3 class="fw-bold mb-0" style="color:var(--accent);">Jadwal Mengajar Anda</h3>
+            <h3 class="fw-bold mb-0" style="color:var(--accent);">Jadwal Mingguan</h3>
             <div class="page-sub">Tanggal menyesuaikan hari jadwal secara otomatis</div>
         </div>
     </div>

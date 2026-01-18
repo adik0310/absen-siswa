@@ -17,9 +17,7 @@ class CreateSiswaTable extends Migration
 
             $table->index('id_kelas');
 
-            $table->foreign('id_kelas')
-                ->references('id_kelas')->on('kelas')
-                ->onDelete('cascade');
+            $table->foreign('id_kelas')->references('id_kelas')->on('kelas')->onDelete('cascade');
 
             $table->timestamps();
             $table->softDeletes();

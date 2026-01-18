@@ -20,7 +20,7 @@ class KelasSeeder extends Seeder
 
         foreach ($kelasList as $namaKelas) {
             DB::table('kelas')->updateOrInsert(
-                ['nama_kelas' => $namaKelas], // cek berdasarkan nama kelas
+                ['nama_kelas' => $namaKelas],
                 [
                     'created_at' => $now,
                     'updated_at' => $now,

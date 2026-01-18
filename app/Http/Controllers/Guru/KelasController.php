@@ -1,6 +1,7 @@
 <?php
 namespace App\Http\Controllers\Guru;
 
+use App\Http\Controllers\Controller;
 use App\Models\Kelas;
 use App\Models\MataPelajaran;
 use Illuminate\Http\Request;

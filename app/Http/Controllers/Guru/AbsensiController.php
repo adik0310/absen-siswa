@@ -552,87 +552,66 @@ public function storeScan(Request $request, $id_jadwal_mengajar)
      * View rekap berdasarkan 1 jadwal.
      */
     public function viewRekapByJadwal($id_jadwal, $year = null, $month = null)
-    {
-        $year = $year ?? now()->year;
-        $month = $month ?? now()->month;
+{
+    $year = $year ?? now()->year;
+    $month = $month ?? now()->month;
 
-        $jadwal = JadwalMengajar::with(['mataPelajaran', 'kelas', 'guru'])->findOrFail($id_jadwal);
+    $jadwal = JadwalMengajar::with(['mataPelajaran', 'kelas', 'guru'])->findOrFail($id_jadwal);
 
-        $user = Auth::user();
-        $currentGuru = optional($user->guru);
-        if ($currentGuru->id_guru ?? null) {
-            if ($jadwal->id_guru && (string)$jadwal->id_guru !== (string)$currentGuru->id_guru) {
-                return redirect()->back()->with('error', 'Anda tidak berwenang melihat rekap untuk jadwal ini.');
-            }
+    $user = Auth::user();
+    $currentGuru = optional($user->guru);
+    if ($currentGuru->id_guru ?? null) {
+        if ($jadwal->id_guru && (string)$jadwal->id_guru !== (string)$currentGuru->id_guru) {
+            return redirect()->back()->with('error', 'Anda tidak berwenang melihat rekap untuk jadwal ini.');
         }
-
-        $data = $this->collectRekapForJadwal($id_jadwal, $year, $month);
-
-        return view('absensi.rekap_by_jadwal', [
-            'jadwal' => $jadwal,
-            'rekap' => $data['rekap'],
-            'year' => $year,
-            'month' => $month,
-        ]);
     }
+
+    $data = $this->collectRekapForJadwal($id_jadwal, $year, $month);
+
+    // --- TAMBAHKAN BARIS INI ---
+    $tanggalCetak = \Carbon\Carbon::now()->toDateString(); 
+    // atau bisa juga: $tanggalCetak = now();
+    // ---------------------------
+
+    return view('absensi.rekap_by_jadwal', [
+        'jadwal' => $jadwal,
+        'rekap' => $data['rekap'],
+        'year' => $year,
+        'month' => $month,
+        'tanggalCetak' => $tanggalCetak, // <-- Pastikan ini dikirim ke view
+    ]);
+}
 
 public function exportPdfByJadwal($id_jadwal, $year, $month)
 {
-    $year = (int)$year;
-    $month = (int)$month;
-    
+    // 1. Ambil data pendukung
     $jadwal = JadwalMengajar::with(['kelas', 'mataPelajaran', 'guru'])->findOrFail($id_jadwal);
     
+    // Ambil tanggal cetak (hari ini)
+    $tanggalCetak = \Carbon\Carbon::now()->translatedFormat('d F Y');
+    
+    // 2. AMBIL DATA REKAP (Logika harus sama dengan yang di View)
+    // Gunakan helper yang sudah kamu buat agar konsisten
+    $data = $this->collectRekapForJadwal($id_jadwal, $year, $month);
+    $rekap = $data['rekap'];
+
+    // 3. Ambil Identitas Guru untuk tanda tangan
     $user = Auth::user();
     $namaGuruLogin = $user->guru ? $user->guru->nama_guru : $user->name;
     $nipGuru = $user->guru ? $user->guru->nip : '..........................';
 
-    // --- TAMBAHKAN BARIS INI ---
-    // Menggunakan Carbon untuk mendapatkan tanggal hari ini dalam format Indonesia
-    $tanggalCetak = \Carbon\Carbon::now()->translatedFormat('d F Y');
-    // ---------------------------
-
-    // Ambil semua siswa di kelas tersebut
-    $siswas = Siswa::where('id_kelas', $jadwal->id_kelas)->orderBy('nama_siswa')->get();
-
-    // Ambil data absensi detail untuk bulan tersebut spesifik id_jadwal ini
-    $allAbsensi = Absensi::where('id_jadwal_mengajar', $id_jadwal)
-                ->whereYear('tanggal', $year)
-                ->whereMonth('tanggal', $month)
-                ->get()
-                ->groupBy('id_siswa');
-
-    $rekap = $siswas->map(function($s) use ($allAbsensi) {
-        $logs = $allAbsensi->get($s->id_siswa, collect());
-        
-        $harian = [];
-        foreach($logs as $log) {
-            $harian[$log->tanggal] = $log->keterangan;
-        }
-
-        return (object)[
-            'id_siswa'   => $s->id_siswa,
-            'nama_siswa' => $s->nama_siswa,
-            'nis'        => $s->nis,
-            'harian'     => $harian,
-            'hadir'      => $logs->where('keterangan', 'hadir')->count(),
-            'sakit'      => $logs->where('keterangan', 'sakit')->count(),
-            'izin'       => $logs->where('keterangan', 'izin')->count(),
-            'alfa'       => $logs->where('keterangan', 'alfa')->count(),
-        ];
-    });
-
-    $pdf = Pdf::loadView('absensi.rekap_by_jadwal_pdf', [
+    // 4. Generate PDF
+    $pdf = Pdf::loadView('absensi.rekap_by_jadwal_pdf', [ // Pastikan nama view ini benar
         'jadwal' => $jadwal,
         'rekap'  => $rekap,
         'year'   => $year,
         'month'  => $month,
         'namaGuruLogin' => $namaGuruLogin,
         'nipGuru' => $nipGuru,
-        'tanggalCetak' => $tanggalCetak // <-- Pastikan ini dikirim ke view
-    ])->setPaper('a4', 'landscape');
+        'tanggalCetak' => $tanggalCetak
+    ])->setPaper('a4', 'portrait'); // Jika kolom sedikit, portrait saja biar rapi
 
-    return $pdf->download("rekap_harian_jadwal_{$jadwal->mataPelajaran->nama_mapel}.pdf");
+    return $pdf->download("Rekap_Absen_{$jadwal->kelas->nama_kelas}.pdf");
 }
 
 public function exportExcelByJadwal($id_jadwal, $year, $month)
@@ -662,7 +641,6 @@ public function exportExcelByJadwal($id_jadwal, $year, $month)
             // Kita simpan tanggal sebagai key, dan keterangan sebagai value
             $harian[$log->tanggal] = $log->keterangan;
         }
-
         return (object)[
             'id_siswa'   => $s->id_siswa,
             'nama_siswa' => $s->nama_siswa,

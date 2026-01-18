@@ -5,7 +5,7 @@
 @push('head')
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
 <style>
-    .container-fluid { padding: 0 45px; }
+    .container-fluid { padding: 0 115px; }
 
     /* Card Styling */
     .card-rekap { border-radius: 12px; border: none; box-shadow: 0 4px 12px rgba(0,0,0,0.05); background: #fff; overflow: hidden; }
@@ -196,7 +196,7 @@
                 <span class="badge-status bg-hadir">H</span> <small>Hadir</small>
                 <span class="badge-status bg-sakit">S</span> <small>Sakit</small>
                 <span class="badge-status bg-izin">I</span> <small>Izin</small>
-                <span class="badge-status bg-alfa">A</span> <small>Alpa</small>
+                <span class="badge-status bg-alfa">A</span> <small>Alfa</small>
             </div>
         </div>
         <div class="col-md-6 text-md-end text-muted small">

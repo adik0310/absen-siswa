@@ -6,7 +6,7 @@
 @push('head')
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
 <style>
-    .container { max-width: 1100px; margin: 28px auto; padding: 0 35px; }
+    .container { max-width: 85%; margin: 28px auto; padding: 0 35px; }
     .card { border: none; border-radius: 14px; box-shadow: 0 3px 12px rgba(0,0,0,0.05); margin-bottom: 24px; overflow: hidden; }
     .badge-soft { padding: 6px 12px; border-radius: 50px; font-weight: 600; font-size: 0.75rem; display: inline-flex; align-items: center; gap: 4px; }
     .badge-soft-success { background: #d1e7dd; color: #0f5132; }
