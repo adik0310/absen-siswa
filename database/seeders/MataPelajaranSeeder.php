@@ -35,7 +35,6 @@ class MataPelajaranSeeder extends Seeder
             'Akidah Akhlak',
             'SKI',
             'Qur\'an Hadits',
-            'IPA (Biologi)',
             'Sosiologi',
         ];
 

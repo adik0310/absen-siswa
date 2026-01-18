@@ -215,13 +215,6 @@
                                 @endforeach
                             </div>
                         </div>
-
-                        {{-- Catatan --}}
-                        <div>
-                            <label class="form-label">Catatan Tambahan</label>
-                            <textarea name="keterangan_detail" class="form-control shadow-sm" rows="3"
-                                      placeholder="Misal: Izin melalui telepon / surat dokter...">{{ old('keterangan_detail', $row->keterangan_detail) }}</textarea>
-                        </div>
                     </div>
                 </div>
             </div>

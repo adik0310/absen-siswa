@@ -12,9 +12,9 @@
 .container-page {
     padding-left: 8rem;
     padding-right: 8rem;
-    max-width: 1065px;
-    margin-left: 3.5rem;
-    margin-right: 60rem;
+    max-width: 1025px;
+    margin-left: 5rem;
+    margin-right: 30rem;
 }
 @media(max-width: 1400px) { .container-page { padding-left: 4rem; padding-right: 4rem; } }
 @media(max-width: 992px) { .container-page { padding-left: 2rem; padding-right: 2rem; } }
@@ -41,7 +41,7 @@
 }
 
 /* ============================
-   Table & Badges
+   Table & Aksi Tombol
 ============================ */
 .table-rekap thead th {
     background-color: #f8fbf9;
@@ -60,6 +60,21 @@
     border-bottom: 1px solid #f1f1f1;
 }
 
+.btn-action-custom {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border-radius: 8px;
+    min-width: 85px; /* Menjaga agar tombol Edit & Hapus lebarnya sama */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+/* ============================
+   Status Badges
+============================ */
 .badge-status {
     padding: 0.45rem 0.75rem;
     border-radius: 8px;
@@ -71,7 +86,6 @@
     gap: 4px;
 }
 
-/* Warna Soft untuk Status */
 .bg-soft-hadir  { background:#dcfce7; color:#15803d; border: 1px solid #bbf7d0; }
 .bg-soft-izin   { background:#e0f2fe; color:#0369a1; border: 1px solid #bae6fd; }
 .bg-soft-sakit  { background:#fef9c3; color:#a16207; border: 1px solid #fef08a; }
@@ -93,21 +107,8 @@
     padding: 0.45rem 0.75rem;
 }
 
-.form-select-sm:focus {
-    border-color: #198754;
-    box-shadow: 0 0 0 0.25rem rgba(25, 135, 84, 0.1);
-}
-
-/* Small details */
 .small-details { font-size: 0.75rem; color: #64748b; margin-top: 2px; }
 .table-hover tbody tr:hover { background-color: #f0fdf4; }
-
-.btn-action-custom {
-    padding: 0.4rem 0.8rem;
-    font-size: 0.75rem;
-    font-weight: 600;
-    border-radius: 8px;
-}
 </style>
 @endpush
 
@@ -166,6 +167,7 @@
                     @endforeach
                 </select>
             </div>
+
             <div class="col-md-3 d-flex gap-2">
                 <button class="btn btn-success btn-action-custom flex-fill shadow-sm">
                     <i class="bi bi-funnel me-1"></i> Filter
@@ -175,14 +177,6 @@
                 </a>
             </div>
         </form>
-    </div>
-
-    {{-- Info Bar --}}
-    <div class="mb-3 ps-2">
-        <span class="badge bg-light text-dark border px-3 py-2 rounded-pill small">
-            <i class="bi bi-database-fill text-success me-2"></i>
-            Total Riwayat: <b class="text-success">{{ $absensi->total() }}</b> Record
-        </span>
     </div>
 
     {{-- Tabel Absensi --}}
@@ -241,15 +235,18 @@
                         </td>
                         <td class="text-center">
                             <div class="d-flex gap-2 justify-content-center">
+                                {{-- Tombol Edit --}}
                                 <a href="{{ route('admin.absensi.edit', $a->id_absensi) }}" 
                                    class="btn btn-sm btn-outline-success btn-action-custom" title="Edit Data">
-                                    <i class="bi bi-pencil-square"></i>
+                                   <span>Edit</span> <i class="bi bi-pencil-square"></i>
                                 </a>
+
+                                {{-- Tombol Hapus --}}
                                 <form action="{{ route('admin.absensi.destroy', $a->id_absensi) }}" method="POST" class="d-inline">
                                     @csrf @method('DELETE')
                                     <button class="btn btn-sm btn-outline-danger btn-action-custom" 
                                             onclick="return confirm('Hapus data absensi ini?')" title="Hapus Data">
-                                        <i class="bi bi-trash"></i>
+                                        <span>Hapus</span> <i class="bi bi-trash"></i>
                                     </button>
                                 </form>
                             </div>
@@ -260,7 +257,6 @@
                         <td colspan="7" class="text-center py-5">
                             <img src="https://illustrations.popsy.co/gray/data-report.svg" style="width: 120px;" class="opacity-50 mb-3">
                             <h6 class="fw-bold text-muted">Data Absensi Tidak Ditemukan</h6>
-                            <p class="text-muted small">Coba sesuaikan filter atau tambahkan data baru.</p>
                         </td>
                     </tr>
                     @endforelse
@@ -279,6 +275,8 @@
 
 </div>
 @endsection
+
+@push('scripts')
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
 $(document).ready(function() {
@@ -291,7 +289,7 @@ $(document).ready(function() {
         // Jika dua-duanya sudah dipilih, kita minta data ke server
         if (kelasId && mapelId) {
             $.ajax({
-                url: "{{ route('admin.get.guru.jadwal') }}", // Kita akan buat route ini
+                url: "{{ route('admin.get.guru.jadwal') }}", 
                 type: "GET",
                 data: { id_kelas: kelasId, id_mapel: mapelId },
                 success: function(res) {
@@ -305,3 +303,4 @@ $(document).ready(function() {
     });
 });
 </script>
+@endpush

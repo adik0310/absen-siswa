@@ -223,13 +223,6 @@
                                 @endforeach
                             </div>
                         </div>
-
-                        {{-- Catatan --}}
-                        <div>
-                            <label class="form-label">Catatan Tambahan (Opsional)</label>
-                            <textarea name="keterangan_detail" class="form-control shadow-sm" rows="3"
-                                      placeholder="Contoh: Izin melalui WhatsApp / Surat menyusul">{{ old('keterangan_detail') }}</textarea>
-                        </div>
                     </div>
                 </div>
             </div>

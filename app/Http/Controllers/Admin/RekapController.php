@@ -11,7 +11,7 @@ use App\Models\Guru;
 use App\Models\MataPelajaran;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
-use App\Exports\RekapViewExport;
+use App\Exports\RekapViewExport; // Pastikan file ini ada jika ingin export Excel
 use Maatwebsite\Excel\Facades\Excel;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Str;
@@ -25,7 +25,6 @@ class RekapController extends Controller
         return view('admin.rekap.index', compact('kelas', 'guru'));
     }
 
-    // Fungsi Ambil Mapel berdasarkan Kelas
     public function getMapelForKelas($id_kelas)
     {
         $mapelIds = DB::table('jadwal_mengajar')
@@ -42,7 +41,6 @@ class RekapController extends Controller
         return response()->json($mapelRows);
     }
 
-    // Fungsi Ambil Guru berdasarkan Kelas & Mapel (PERBAIKAN)
     public function getGuruForMapelKelas($id_kelas, $id_mapel)
     {
         $guruIds = DB::table('jadwal_mengajar')
@@ -60,7 +58,6 @@ class RekapController extends Controller
         return response()->json($guruRows);
     }
 
-    // Fungsi Show dan BuildPayload tetap seperti kode Anda sebelumnya...
     public function show($id_kelas, $year = null, $month = null)
     {
         $year  = $year  ?? Carbon::now()->year;
@@ -75,6 +72,47 @@ class RekapController extends Controller
         );
 
         return view('admin.rekap.show', $payload);
+    }
+
+    // ==========================================
+    // FUNGSI EXPORT PDF (YANG TADI HILANG)
+    // ==========================================
+    public function exportPdf(Request $request)
+    {
+        // Ambil data dari request (form post)
+        $id_kelas = $request->id_kelas;
+        $year     = $request->year;
+        $month    = $request->month;
+        $id_mapel = $request->mapel;
+        $id_guru  = $request->guru;
+
+        // Gunakan buildRekapPayload yang sudah ada untuk ambil data
+        $data = $this->buildRekapPayload($id_kelas, $year, $month, $id_mapel, $id_guru);
+
+        // Load view khusus untuk PDF (pastikan kamu punya file ini: resources/views/admin/rekap/pdf.blade.php)
+        $pdf = Pdf::loadView('admin.cetak.rekap_print', $data)->setPaper('a4', 'landscape');
+        
+        $filename = 'rekap-absensi-' . Str::slug($data['kelasName']) . '-' . $month . '-' . $year . '.pdf';
+        
+        return $pdf->download($filename);
+    }
+
+    // ==========================================
+    // FUNGSI EXPORT EXCEL
+    // ==========================================
+    public function exportExcel(Request $request)
+    {
+        $id_kelas = $request->id_kelas;
+        $year     = $request->year;
+        $month    = $request->month;
+        $id_mapel = $request->mapel;
+        $id_guru  = $request->guru;
+
+        $data = $this->buildRekapPayload($id_kelas, $year, $month, $id_mapel, $id_guru);
+        
+        $filename = 'rekap-absensi-' . Str::slug($data['kelasName']) . '-' . $month . '-' . $year . '.xlsx';
+
+        return Excel::download(new RekapViewExport($data), $filename);
     }
 
     protected function buildRekapPayload(int $id_kelas, int $year, int $month, $id_mapel = null, $id_guru = null): array
